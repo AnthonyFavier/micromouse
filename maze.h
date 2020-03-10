@@ -11,40 +11,56 @@ using namespace std;
 class Maze
 {
 	private:
-		bool m_walls_v[MAZE_WIDTH][MAZE_WIDTH+1];
-		bool m_walls_h[MAZE_WIDTH+1][MAZE_WIDTH];
+		int m_walls_v[MAZE_WIDTH][MAZE_WIDTH+1];
+		int m_walls_h[MAZE_WIDTH+1][MAZE_WIDTH];
 	public:
 		Maze()
+		{
+			for(int i=0; i<MAZE_WIDTH; i++)
+			{
+				for(int j=0; j<MAZE_WIDTH+1; j++)
+					m_walls_v[i][j]=8;
+			}	
+			for(int i=0; i<MAZE_WIDTH+1; i++)
+			{
+				for(int j=0; j<MAZE_WIDTH; j++)
+					m_walls_h[i][j]=8;
+			}
+
+		}
+
+		void draw()
 		{
 			// Init empty
 			//// Vertical walls
 			for(int i=0; i<MAZE_WIDTH; i++)
 			{
-				m_walls_v[i][0]=true;
+				m_walls_v[i][0]=1;
 				for(int j=1; j<MAZE_WIDTH+1-1; j++)
-					m_walls_v[i][j]=false;
-				m_walls_v[i][MAZE_WIDTH]=true;
+					m_walls_v[i][j]=0;
+				m_walls_v[i][MAZE_WIDTH]=1;
 			}
 			//// Horizontal walls
 			for(int j=0; j<MAZE_WIDTH; j++)
 			{
-				m_walls_h[0][j]=true;
+				m_walls_h[0][j]=1;
 				for(int i=1; i<MAZE_WIDTH+1-1; i++)
-					m_walls_h[i][j]=false;
-				m_walls_h[MAZE_WIDTH][j]=true;
+					m_walls_h[i][j]=0;
+				m_walls_h[MAZE_WIDTH][j]=1;
 			}
 
 			// Draw maze
-			m_walls_v[0][8]=true;
-			m_walls_v[1][8]=true;
-			m_walls_v[2][8]=true;
-			m_walls_v[3][8]=true;
-			m_walls_v[4][8]=true;
+			m_walls_v[0][8]=1;
+			m_walls_v[1][8]=1;
+			m_walls_v[2][8]=1;
+			m_walls_v[3][8]=1;
+			m_walls_v[4][8]=1;
+
 		}
 
-		bool getWallDown(int x, int y)
+		int getWallDown(int x, int y)
 		{
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
 				return m_walls_h[x][y];
 			else
 			{
@@ -52,19 +68,19 @@ class Maze
 				return true;
 			}
 		}
-		bool getWallUp(int x, int y)
+		int getWallUp(int x, int y)
 		{
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
-				return m_walls_h[x][y+1];
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
+				return m_walls_h[x+1][y];
 			else
 			{
 				cout << "ERREUR: getWallUp: x,y out of bound" << endl;
 				return true;
 			}
 		}
-		bool getWallLeft(int x, int y)
+		int getWallLeft(int x, int y)
 		{
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
 				return m_walls_v[x][y];
 			else
 			{
@@ -72,10 +88,10 @@ class Maze
 				return true;
 			}
 		}
-		bool getWallRight(int x, int y)
+		int getWallRight(int x, int y)
 		{
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
-				return m_walls_v[x+1][y];
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
+				return m_walls_v[x][y+1];
 			else
 			{
 				cout << "ERREUR: getWallRight: x,y out of bound" << endl;
@@ -83,44 +99,48 @@ class Maze
 			}
 		}
 
-		void setWallDown(int x, int y, bool wall)
+		void setWallDown(int x, int y, int wall)
 		{	
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
 				m_walls_h[x][y]=wall;
 			else
 				cout << "ERREUR: setWallDown: x,y out of bound" << endl;
 		}
-		void setWallUp(int x, int y, bool wall)
+		void setWallUp(int x, int y, int wall)
 		{	
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
-				m_walls_h[x][y+1]=wall;
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
+				m_walls_h[x+1][y]=wall;
 			else
 				cout << "ERREUR: setWallUp: x,y out of bound" << endl;
 		}
-		void setWallLeft(int x, int y, bool wall)
+		void setWallLeft(int x, int y, int wall)
 		{	
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
 				m_walls_v[x][y]=wall;
 			else
 				cout << "ERREUR: setWallLeft: x,y out of bound" << endl;
 		}
-		void setWallRight(int x, int y, bool wall)
+		void setWallRight(int x, int y, int wall)
 		{	
-			if(x>=0 && x<MAZE_WIDTH-1 && y>=0 && y<MAZE_WIDTH-1)
-				m_walls_v[x+1][y]=wall;
+			if(x>=0 && x<MAZE_WIDTH && y>=0 && y<MAZE_WIDTH)
+				m_walls_v[x][y+1]=wall;
 			else
 				cout << "ERREUR: setWallRight: x,y out of bound" << endl;
 		}
 
 		void show()
 		{
+			cout << endl;
+			// Top horizontal
 			cout << "  ";
 			for(int j=0; j<MAZE_WIDTH; j++)
 				cout << m_walls_h[MAZE_WIDTH][j] << "   ";
 			cout << endl;
 
+			// Middle
 			for(int i=MAZE_WIDTH-1; i>=0; i--)
 			{	
+				// Vertical walls
 				for(int j=0; j<MAZE_WIDTH+1; j++)
 				{
 					cout << m_walls_v[i][j];
@@ -129,6 +149,7 @@ class Maze
 				}
 				cout << endl;
 
+				// Horizontal walls (expect bot and top)
 				if(i!=0)
 				{
 					cout << "  ";
@@ -142,12 +163,62 @@ class Maze
 				}
 			}
 
+			// Bot horizontal
 			cout << "  ";
 			for(int j=0; j<MAZE_WIDTH; j++)
 				cout << m_walls_h[0][j] << "   ";
 			cout << endl;
 
 		}
+
+		void show(int x, int y)
+		{
+			cout << endl;
+			// Top horizontal
+			cout << "  ";
+			for(int j=0; j<MAZE_WIDTH; j++)
+				cout << m_walls_h[MAZE_WIDTH][j] << "   ";
+			cout << endl;
+
+			// Middle
+			for(int i=MAZE_WIDTH-1; i>=0; i--)
+			{	
+				// Vertical walls
+				for(int j=0; j<MAZE_WIDTH+1; j++)
+				{
+					cout << m_walls_v[i][j];
+					if(j!=MAZE_WIDTH)
+					{
+						if(i==x && j==y)
+							cout << " X ";
+						else
+							cout << " ¤ ";
+					}
+				}
+				cout << endl;
+
+				// Horizontal walls (expect bot and top)
+				if(i!=0)
+				{
+					cout << "  ";
+					for(int j=0; j<MAZE_WIDTH; j++)
+					{
+						cout << m_walls_h[i][j];
+						if(j!=MAZE_WIDTH-1)
+							cout << "   ";
+					}
+					cout << endl;
+				}
+			}
+
+			// Bot horizontal
+			cout << "  ";
+			for(int j=0; j<MAZE_WIDTH; j++)
+				cout << m_walls_h[0][j] << "   ";
+			cout << endl;
+
+		}
+
 };
 
 #endif
