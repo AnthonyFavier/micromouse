@@ -13,8 +13,6 @@ int main(int argc, char** argv)
 	maze.show();
 
 	Mouse mouse;
-	mouse.showMap();
-
 	mouse.checkWalls(&maze);
 	mouse.showMap();
 

@@ -6,6 +6,10 @@
 
 #include <iostream>
 
+#define WALL 1
+#define NOWALL 0
+#define UWALL 5
+
 using namespace std;
 
 class Maze
@@ -19,12 +23,12 @@ class Maze
 			for(int i=0; i<MAZE_WIDTH; i++)
 			{
 				for(int j=0; j<MAZE_WIDTH+1; j++)
-					m_walls_v[i][j]=8;
+					m_walls_v[i][j]=UWALL;
 			}	
 			for(int i=0; i<MAZE_WIDTH+1; i++)
 			{
 				for(int j=0; j<MAZE_WIDTH; j++)
-					m_walls_h[i][j]=8;
+					m_walls_h[i][j]=UWALL;
 			}
 
 		}
@@ -35,26 +39,26 @@ class Maze
 			//// Vertical walls
 			for(int i=0; i<MAZE_WIDTH; i++)
 			{
-				m_walls_v[i][0]=1;
+				m_walls_v[i][0]=WALL;
 				for(int j=1; j<MAZE_WIDTH+1-1; j++)
-					m_walls_v[i][j]=0;
-				m_walls_v[i][MAZE_WIDTH]=1;
+					m_walls_v[i][j]=NOWALL;
+				m_walls_v[i][MAZE_WIDTH]=WALL;
 			}
 			//// Horizontal walls
 			for(int j=0; j<MAZE_WIDTH; j++)
 			{
-				m_walls_h[0][j]=1;
+				m_walls_h[0][j]=WALL;
 				for(int i=1; i<MAZE_WIDTH+1-1; i++)
-					m_walls_h[i][j]=0;
-				m_walls_h[MAZE_WIDTH][j]=1;
+					m_walls_h[i][j]=NOWALL;
+				m_walls_h[MAZE_WIDTH][j]=WALL;
 			}
 
 			// Draw maze
-			m_walls_v[0][8]=1;
-			m_walls_v[1][8]=1;
-			m_walls_v[2][8]=1;
-			m_walls_v[3][8]=1;
-			m_walls_v[4][8]=1;
+			m_walls_v[0][8]=WALL;
+			m_walls_v[1][8]=WALL;
+			m_walls_v[2][8]=WALL;
+			m_walls_v[3][8]=WALL;
+			m_walls_v[4][8]=WALL;
 
 		}
 
