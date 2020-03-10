@@ -46,10 +46,26 @@ class Mouse
 			m_mazeInt.show(m_x,m_y);
 		}
 
-		void moveUp(){m_x++;}
-		void moveDown(){m_x--;}
-		void moveLeft(){m_y--;}
-		void moveRight(){m_y++;}
+		void moveUp()
+		{
+			if(m_mazeInt.getWallUp(m_x,m_y)==0)
+				m_x++;
+		}
+		void moveDown()
+		{
+			if(m_mazeInt.getWallDown(m_x,m_y)==0)
+				m_x--;
+		}
+		void moveRight()
+		{
+			if(m_mazeInt.getWallRight(m_x,m_y)==0)
+				m_y++;
+		}
+		void moveLeft()
+		{
+			if(m_mazeInt.getWallLeft(m_x,m_y)==0)
+				m_y--;
+		}
 };
 
 #endif

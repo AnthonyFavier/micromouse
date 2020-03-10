@@ -16,22 +16,21 @@ int main(int argc, char** argv)
 	mouse.checkWalls(&maze);
 	mouse.showMap();
 
-	char choix;
+	string choix;
 	while(1)
 	{
 		cin >> choix;
 
-		if(choix=='z')
+		if(choix=="z")
 			mouse.moveUp();
-		else if(choix=='d')
+		else if(choix=="d")
 			mouse.moveRight();
-		else if(choix=='s')
+		else if(choix=="s")
 			mouse.moveDown();
-		else if(choix=='q')
+		else if(choix=="q")
 			mouse.moveLeft();
 		mouse.checkWalls(&maze);
 		mouse.showMap();
-
 	}
 
 	return 0;
