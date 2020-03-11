@@ -54,6 +54,19 @@ class Maze
 			}
 
 			// Draw maze
+			// end
+			m_walls_h[4][4]=WALL;
+			m_walls_h[4][5]=WALL;
+			m_walls_h[6][4]=WALL;
+			m_walls_v[4][4]=WALL;
+			m_walls_v[5][4]=WALL;
+			m_walls_v[4][6]=WALL;
+			m_walls_v[5][6]=WALL;
+
+			// start
+			m_walls_v[0][1]=WALL;
+			m_walls_v[1][1]=WALL;
+
 			m_walls_v[0][8]=WALL;
 			m_walls_v[1][8]=WALL;
 			m_walls_v[2][8]=WALL;
@@ -134,54 +147,21 @@ class Maze
 
 		void show()
 		{
-			cout << endl;
-			// Top horizontal
-			cout << "  ";
-			for(int j=0; j<MAZE_WIDTH; j++)
-				cout << m_walls_h[MAZE_WIDTH][j] << "   ";
-			cout << endl;
-
-			// Middle
-			for(int i=MAZE_WIDTH-1; i>=0; i--)
-			{	
-				// Vertical walls
-				for(int j=0; j<MAZE_WIDTH+1; j++)
-				{
-					cout << m_walls_v[i][j];
-					if(j!=MAZE_WIDTH)
-						cout << " ¤ ";
-				}
-				cout << endl;
-
-				// Horizontal walls (expect bot and top)
-				if(i!=0)
-				{
-					cout << "  ";
-					for(int j=0; j<MAZE_WIDTH; j++)
-					{
-						cout << m_walls_h[i][j];
-						if(j!=MAZE_WIDTH-1)
-							cout << "   ";
-					}
-					cout << endl;
-				}
-			}
-
-			// Bot horizontal
-			cout << "  ";
-			for(int j=0; j<MAZE_WIDTH; j++)
-				cout << m_walls_h[0][j] << "   ";
-			cout << endl;
-
+			show(-1,-1);
 		}
 
 		void show(int x, int y)
 		{
 			cout << endl;
 			// Top horizontal
-			cout << "  ";
+			cout << " ";
 			for(int j=0; j<MAZE_WIDTH; j++)
-				cout << m_walls_h[MAZE_WIDTH][j] << "   ";
+			{
+				if(m_walls_h[MAZE_WIDTH][j]==1)
+					cout << "--- ";
+				else
+					cout << " " << m_walls_h[MAZE_WIDTH][j] << "  ";
+			}
 			cout << endl;
 
 			// Middle
@@ -190,7 +170,10 @@ class Maze
 				// Vertical walls
 				for(int j=0; j<MAZE_WIDTH+1; j++)
 				{
-					cout << m_walls_v[i][j];
+					if(m_walls_v[i][j]==1)
+						cout << "|";
+					else
+						cout << m_walls_v[i][j];
 					if(j!=MAZE_WIDTH)
 					{
 						if(i==x && j==y)
@@ -204,22 +187,37 @@ class Maze
 				// Horizontal walls (expect bot and top)
 				if(i!=0)
 				{
-					cout << "  ";
+					cout << " ";
 					for(int j=0; j<MAZE_WIDTH; j++)
 					{
-						cout << m_walls_h[i][j];
-						if(j!=MAZE_WIDTH-1)
-							cout << "   ";
+						if(m_walls_h[i][j]==1)
+						{
+							cout << "---";
+							if(j!=MAZE_WIDTH-1)
+								cout << " ";
+						}
+						else
+						{
+							cout << " " << m_walls_h[i][j];
+							if(j!=MAZE_WIDTH-1)
+								cout << "  ";
+						}
 					}
 					cout << endl;
 				}
 			}
 
 			// Bot horizontal
-			cout << "  ";
+			cout << " ";
 			for(int j=0; j<MAZE_WIDTH; j++)
-				cout << m_walls_h[0][j] << "   ";
+			{
+				if(m_walls_h[0][j]==1)
+					cout << "--- ";
+				else
+					cout << " " << m_walls_h[0][j] << "  ";
+			}
 			cout << endl;
+
 
 		}
 
