@@ -16,6 +16,9 @@ class Mouse
 		int m_start_x;
 		int m_start_y;
 
+		int m_end_x;
+		int m_end_y;
+
 		Maze m_mazeInt;
 		Tile m_openList[MAZE_WIDTH*MAZE_WIDTH];
 		Tile m_closedList[MAZE_WIDTH*MAZE_WIDTH];
@@ -39,6 +42,9 @@ class Mouse
 			vide.t_cost=-1;
 			vide.p_x=-1;
 			vide.p_y=-1;
+
+			m_end_x=-1;
+			m_end_y=-1;
 
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
@@ -182,7 +188,7 @@ class Mouse
 		{
 			bool arrive=false;
 			if((tile.x==MAZE_WIDTH/2-1 || tile.x==MAZE_WIDTH/2)
-			&& (tile.y==MAZE_WIDTH/2-1 || tile.y==MAZE_WIDTH/2))
+					&& (tile.y==MAZE_WIDTH/2-1 || tile.y==MAZE_WIDTH/2))
 				arrive=true;
 			return arrive;
 		}
@@ -302,6 +308,42 @@ class Mouse
 			neighbour->p_y=y;
 		}
 
+		void computeOptPath()
+		{
+			// search for end tile in closed
+			int cp_x=-1;
+			int cp_y=-1;
+			for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+			{
+				if(m_closedList[i].x==m_end_x && m_closedList[i].y==m_end_y)
+				{
+					cp_x=m_closedList[i].p_x;
+					cp_y=m_closedList[i].p_y;
+				}
+
+			}
+
+			cout << "Path :" << endl;
+			cout << "(" << m_end_x << "," << m_end_y << ")<-";
+			cout << "(" << cp_x << "," << cp_y << ")<-";
+
+			// follow parents	
+			while(cp_x!=m_start_x || cp_y!=m_start_y)
+			{
+				for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					if(m_closedList[i].x==cp_x && m_closedList[i].y==cp_y)
+					{
+						cp_x=m_closedList[i].p_x;
+						cp_y=m_closedList[i].p_y;
+						cout << "(" << cp_x << "," << cp_y << ")<-";
+						break;
+					}
+				}
+			}
+			cout << endl;
+		}
+
 		void explore(Maze* mazeExt)
 		{
 			// start tile
@@ -330,13 +372,12 @@ class Mouse
 			{
 				cout << endl << "avant" << endl;
 				debug_showOpen();
-				debug_showClosed();
 
 				current=getOpenLowestCost();
 
 				cout << "need to go to : ";
 				debug_showTile(current);
-				debug_showOpen();
+				showMap();
 
 				//goTo(current);
 				while(choix!="o")
@@ -358,6 +399,9 @@ class Mouse
 				if(isDestination(current))
 				{
 					cout << "exploration over !" << endl;
+					m_end_x=current.x;
+					m_end_y=current.y;
+					computeOptPath();
 					break;
 				}
 
