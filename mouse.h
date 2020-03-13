@@ -180,7 +180,11 @@ class Mouse
 
 		bool isDestination(Tile tile)
 		{
-			return false;
+			bool arrive=false;
+			if((tile.x==MAZE_WIDTH/2-1 || tile.x==MAZE_WIDTH/2)
+			&& (tile.y==MAZE_WIDTH/2-1 || tile.y==MAZE_WIDTH/2))
+				arrive=true;
+			return arrive;
 		}
 
 		void setFCost(Tile* tile)
@@ -330,7 +334,10 @@ class Mouse
 				checkWalls(mazeExt);
 
 				if(isDestination(current))
+				{
+					cout << "exploration over !" << endl;
 					break;
+				}
 
 				lookForNeighbour(neighbour); // return neighbour traversable and not in CLOSED
 
