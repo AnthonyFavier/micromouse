@@ -16,7 +16,9 @@ int main(int argc, char** argv)
 	mouse.checkWalls(&maze);
 	mouse.showMap();
 
-	string choix;
+	mouse.explore(&maze);
+
+	/*string choix;
 	while(1)
 	{
 		cin >> choix;
@@ -31,7 +33,7 @@ int main(int argc, char** argv)
 			mouse.moveLeft();
 		mouse.checkWalls(&maze);
 		mouse.showMap();
-	}
+	}*/
 
 	return 0;
 }
