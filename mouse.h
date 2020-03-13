@@ -4,16 +4,8 @@
 #include <iostream>
 
 #include "maze.h"
+#include "tile.h"
 
-struct Tile
-{
-	int f_cost;
-	int dist;
-	int t_cost;
-	int x;
-	int y;
-	bool empty;
-};
 
 class Mouse
 {
@@ -22,8 +14,8 @@ class Mouse
 		int m_y;
 
 		Maze m_mazeInt;
-		Tile openList[MAZE_WIDTH*MAZE_WIDTH];
-		Tile closedList[MAZE_WIDTH*MAZE_WIDTH];
+		Tile m_openList[MAZE_WIDTH*MAZE_WIDTH];
+		Tile m_closedList[MAZE_WIDTH*MAZE_WIDTH];
 
 		Tile vide;
 
@@ -42,8 +34,8 @@ class Mouse
 
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
-				openList[i]=vide;
-				closedList[i]=vide;
+				m_openList[i]=vide;
+				m_closedList[i]=vide;
 			}
 		}
 
@@ -70,7 +62,7 @@ class Mouse
 
 		void showMap()
 		{
-			m_mazeInt.show(m_x,m_y);
+			m_mazeInt.show(m_x,m_y,m_openList,m_closedList);
 		}
 
 		void moveUp()
@@ -98,35 +90,35 @@ class Mouse
 		{
 			//update costs
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
-				updateCost(openList+i);
+				updateCost(m_openList+i);
 
 			// search for lowest cost tile // add distance from itself
 			int i_min=0;
-			int cost_min=openList[0].t_cost;
-			int dist=openList[0].dist;
+			int cost_min=m_openList[0].t_cost;
+			int dist=m_openList[0].dist;
 			for(int i=1; i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
-				if(!openList[i].empty)
+				if(!m_openList[i].empty)
 				{
-					if((openList[i].t_cost<cost_min)
-							|| (openList[i].t_cost==cost_min && openList[i].dist<dist))
+					if((m_openList[i].t_cost<cost_min)
+							|| (m_openList[i].t_cost==cost_min && m_openList[i].dist<dist))
 					{
 						i_min=i;
-						cost_min=openList[i].t_cost;
-						dist=openList[i].dist;
+						cost_min=m_openList[i].t_cost;
+						dist=m_openList[i].dist;
 					}
 				}
 			}
 			Tile tile;
-			tile=openList[i_min];
+			tile=m_openList[i_min];
 
 			// remove
 			removeOpen(i_min);
 
 			// add current to closed
 			int n;
-			for(n=0; !closedList[n].empty && n<MAZE_WIDTH*MAZE_WIDTH-1; n++){} // attention n<
-			closedList[n]=tile;
+			for(n=0; !m_closedList[n].empty && n<MAZE_WIDTH*MAZE_WIDTH-1; n++){} // attention n<
+			m_closedList[n]=tile;
 
 			return tile;
 		}
@@ -144,7 +136,8 @@ class Mouse
 				neighbour[i]=vide;
 
 			int index=0;
-			if(!m_mazeInt.getWallUp(m_x,m_y))
+			if(!m_mazeInt.getWallUp(m_x,m_y)
+					&& !isInClosed(m_x+1, m_y))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x+1;
@@ -153,7 +146,8 @@ class Mouse
 				updateCost(neighbour+index);
 				index++;
 			}
-			if(!m_mazeInt.getWallDown(m_x,m_y))
+			if(!m_mazeInt.getWallDown(m_x,m_y)
+					&& !isInClosed(m_x-1, m_y))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x-1;
@@ -162,7 +156,8 @@ class Mouse
 				updateCost(neighbour+index);
 				index++;
 			}
-			if(!m_mazeInt.getWallRight(m_x,m_y))
+			if(!m_mazeInt.getWallRight(m_x,m_y)
+					&& !isInClosed(m_x, m_y+1))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
@@ -171,7 +166,8 @@ class Mouse
 				updateCost(neighbour+index);
 				index++;
 			}
-			if(!m_mazeInt.getWallLeft(m_x,m_y))
+			if(!m_mazeInt.getWallLeft(m_x,m_y)
+					&& !isInClosed(m_x, m_y-1))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
@@ -186,7 +182,6 @@ class Mouse
 		{
 			return false;
 		}
-
 
 		void setFCost(Tile* tile)
 		{
@@ -224,56 +219,54 @@ class Mouse
 			return false;
 		}
 
-		bool isInOpen(Tile tile)
+		bool isInClosed(int x, int y)
+		{	
+			bool found=false;
+			for(int i=0; !found && !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+			{
+				if(m_closedList[i].x==x && m_closedList[i].y==y)
+					found=true; 
+			}
+			return found;
+		}
+
+		bool isInOpen(int x, int y)
 		{
-			return false;
+			bool found=false;
+			for(int i=0; !found && !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+			{
+				if(m_openList[i].x==x && m_openList[i].y==y)
+					found=true; 
+			}
+			return found;
 		}
 
 		void addInOpen(Tile tile)
 		{
+			int i;
+			for(i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH-1; i++){} // <
+			m_openList[i]=tile;
 		}
 
 		void removeOpen(int i)
 		{
-			openList[i]=vide;
+			m_openList[i]=vide;
 			Tile back[MAZE_WIDTH*MAZE_WIDTH];
 			int index_back=0;
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
-				if(!openList[i].empty)
+				if(!m_openList[i].empty)
 				{
-					back[index_back]=openList[i];
+					back[index_back]=m_openList[i];
 					index_back++;
-					openList[i]=vide;
+					m_openList[i]=vide;
 				}
 			}
 
 			for(int i=0; i<index_back; i++)
 			{
-				openList[i]=back[i];
+				m_openList[i]=back[i];
 			}
-		}
-
-		void debug_showOpen()
-		{
-			cout << endl << "OpenList :" << endl;
-			for(int i=0; i<5; i++)
-			{
-				cout << "- (" << openList[i].x << "," << openList[i].y << ") empty=" << openList[i].empty << " f_cost=" <<  openList[i].f_cost << " dist=" <<  openList[i].dist << " t_cost=" <<  openList[i].t_cost <<  endl;
-			}
-		}
-
-		void debug_showTile(Tile tile)
-		{
-
-			cout << endl <<  "Tile=(" << tile.x << "," << tile.y << ") empty=" << tile.empty << " f_cost=" << tile.f_cost << " dist=" << tile.dist << " t_cost=" << tile.t_cost << endl;
-		}
-
-		void debug_showNeighbour(Tile* tiles)
-		{
-			for(int i=0; i<4; i++)
-				cout << endl <<  "N["<<i<<"]=(" << tiles[i].x << "," << tiles[i].y << ") empty=" << tiles[i].empty << " f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost;
-
 		}
 
 		void explore(Maze* mazeExt)
@@ -288,36 +281,44 @@ class Mouse
 			start.t_cost=0;
 
 			// add start node
-			openList[0]=start;
+			addInOpen(start);
 
 			// variables
 			Tile current;
 			Tile neighbour[4];
 			for(int i=0; i<4; i++)
 				neighbour[i]=vide;
+			string choix="";
 
 			// main loop to explore
-			string choix;
 			while(1)
 			{
-				cout << endl << endl << "avant" << endl;
+				cout << endl << "avant" << endl;
 				debug_showOpen();
+				debug_showClosed();
+
 				current=getOpenLowestCost();
+
+				cout << "need to go to : ";
 				debug_showTile(current);
 				debug_showOpen();
 
 				//goTo(current);
-				cin >> choix;
-				if(choix=="z")
-					moveUp();
-				else if(choix=="d")
-					moveRight();
-				else if(choix=="s")
-					moveDown();
-				else if(choix=="q")
-					moveLeft();
+				while(choix!="o")
+				{
+					cin >> choix;
+					if(choix=="z")
+						moveUp();
+					else if(choix=="d")
+						moveRight();
+					else if(choix=="s")
+						moveDown();
+					else if(choix=="q")
+						moveLeft();
+					showMap();
+				}
+				choix="";
 				checkWalls(mazeExt);
-				showMap();
 
 				if(isDestination(current))
 					break;
@@ -333,13 +334,15 @@ class Mouse
 						setFCost(neighbour+i);
 						setPath(neighbour+i);
 					}
-					else if(!isInOpen(neighbour[i]))
+					else if(!isInOpen(neighbour[i].x, neighbour[i].y))
 					{
 						setFCost(neighbour+i);
 						setPath(neighbour+i);
 						addInOpen(neighbour[i]);
 					}
 				}
+
+				showMap();
 			}
 		}
 
@@ -366,6 +369,33 @@ class Mouse
 		   if neighbour is not in OPEN
 		   add neighbour to OPEN
 		 */
+
+		void debug_showOpen()
+		{
+			cout << "OpenList :" << endl;
+			for(int i=0; i<5; i++)
+				cout << m_openList[i].empty << " - (" << m_openList[i].x << "," << m_openList[i].y << ") f_cost=" <<  m_openList[i].f_cost << " dist=" <<  m_openList[i].dist << " t_cost=" <<  m_openList[i].t_cost <<  endl;
+		}	
+		void debug_showClosed()
+		{
+			cout << "ClosedList :" << endl;
+			for(int i=0; i<10; i++)
+				cout << m_closedList[i].empty << " - (" << m_closedList[i].x << "," << m_closedList[i].y << ") f_cost=" <<  m_closedList[i].f_cost << " dist=" <<  m_closedList[i].dist << " t_cost=" <<  m_closedList[i].t_cost <<  endl;
+		}
+
+		void debug_showTile(Tile tile)
+		{
+
+			cout << endl <<  "Tile=(" << tile.x << "," << tile.y << ") empty=" << tile.empty << " f_cost=" << tile.f_cost << " dist=" << tile.dist << " t_cost=" << tile.t_cost << endl;
+		}
+		void debug_showNeighbour(Tile* tiles)
+		{
+			cout << "Neighbours :" << endl;
+			for(int i=0; i<4; i++)
+				cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ") f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << endl;;
+
+		}
+
 };
 
 #endif
