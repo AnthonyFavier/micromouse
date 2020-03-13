@@ -13,6 +13,9 @@ class Mouse
 		int m_x;
 		int m_y;
 
+		int m_start_x;
+		int m_start_y;
+
 		Maze m_mazeInt;
 		Tile m_openList[MAZE_WIDTH*MAZE_WIDTH];
 		Tile m_closedList[MAZE_WIDTH*MAZE_WIDTH];
@@ -22,15 +25,20 @@ class Mouse
 	public:
 		Mouse()
 		{
-			m_x=0;
-			m_y=0;
+			m_start_x=0;
+			m_start_y=0;
+
+			m_x=m_start_x;
+			m_y=m_start_y;
 
 			vide.empty=true;
 			vide.x=-1;
 			vide.y=-1;
-			vide.dist=-1;
+			vide.dist=0;
 			vide.f_cost=-1;
 			vide.t_cost=-1;
+			vide.p_x=-1;
+			vide.p_y=-1;
 
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
@@ -142,8 +150,6 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x+1;
 				neighbour[index].y=m_y;
-				setFCost(neighbour+index);
-				updateCost(neighbour+index);
 				index++;
 			}
 			if(!m_mazeInt.getWallDown(m_x,m_y)
@@ -152,8 +158,6 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x-1;
 				neighbour[index].y=m_y;
-				setFCost(neighbour+index);
-				updateCost(neighbour+index);
 				index++;
 			}
 			if(!m_mazeInt.getWallRight(m_x,m_y)
@@ -162,8 +166,6 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
 				neighbour[index].y=m_y+1;
-				setFCost(neighbour+index);
-				updateCost(neighbour+index);
 				index++;
 			}
 			if(!m_mazeInt.getWallLeft(m_x,m_y)
@@ -172,8 +174,6 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
 				neighbour[index].y=m_y-1;
-				setFCost(neighbour+index);
-				updateCost(neighbour+index);
 				index++;
 			}
 		}
@@ -192,7 +192,22 @@ class Mouse
 			if(!tile->empty)
 			{
 				// from start
-				int g_cost=0;
+				int g_cost=1;
+				int cp_x=tile->p_x;
+				int cp_y=tile->p_y;
+				while(cp_x!=m_start_x || cp_y!=m_start_y)
+				{
+					for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+					{
+						if(m_closedList[i].x==cp_x && m_closedList[i].y==cp_y)
+						{
+							cp_x=m_closedList[i].p_x;
+							cp_y=m_closedList[i].p_y;
+							g_cost++;
+							break;
+						}
+					}
+				}
 
 				// to end
 				int h_cost=0;
@@ -204,7 +219,6 @@ class Mouse
 					h_cost=(tile->x - MAZE_WIDTH/2)+(tile->y - MAZE_WIDTH/2);
 				else if(tile->x >= MAZE_WIDTH/2 && tile->y <= MAZE_WIDTH/2-1)
 					h_cost=(tile->x - MAZE_WIDTH/2)+(MAZE_WIDTH/2-1 - tile->y);
-
 
 				// f_cost compute
 				int f_cost=g_cost+h_cost;
@@ -282,16 +296,24 @@ class Mouse
 			}
 		}
 
+		void setParent(Tile* neighbour, int x, int y)
+		{
+			neighbour->p_x=x;
+			neighbour->p_y=y;
+		}
+
 		void explore(Maze* mazeExt)
 		{
 			// start tile
 			Tile start;
 			start.empty=false;
-			start.x=m_x;
-			start.y=m_y;
+			start.x=m_start_x;
+			start.y=m_start_y;
 			start.f_cost=0;
 			start.dist=0;
 			start.t_cost=0;
+			start.p_x=-1;
+			start.p_y=-1;
 
 			// add start node
 			addInOpen(start);
@@ -347,13 +369,16 @@ class Mouse
 				{
 					if(isPathShorter(current, neighbour[i]))
 					{
+						setParent(neighbour+i,current.x,current.y);
 						setFCost(neighbour+i);
 						setPath(neighbour+i);
 					}
 					else if(!isInOpen(neighbour[i].x, neighbour[i].y))
 					{
+						setParent(neighbour+i,current.x,current.y);
 						setFCost(neighbour+i);
 						setPath(neighbour+i);
+
 						addInOpen(neighbour[i]);
 					}
 				}
@@ -370,47 +395,48 @@ class Mouse
 
 		   loop
 		   current = node in OPEN with the lowest f_cost
-		   remoe current from OPEN
+		   remove current from OPEN
 		   add current to CLOSED
 
 		   if current is the target node
-		   return
-		   foreach neighbour of the current node
-		   if neighbour is not traversable or nieghbour is in CLOSED
-		   skip to the next neighbour
+			   return
 
-		   if new path to neighbour is shorter OR neighbour is not in OPEN
-		   set f_cost of neighbour
-		   set parent of neighbour to current
-		   if neighbour is not in OPEN
-		   add neighbour to OPEN
+		   foreach neighbour of the current node
+			   if neighbour is not traversable or nieghbour is in CLOSED
+			   skip to the next neighbour
+
+			   if new path to neighbour is shorter OR neighbour is not in OPEN
+				   set f_cost of neighbour
+				   set parent of neighbour to current
+				   if neighbour is not in OPEN
+					   add neighbour to OPEN
 		 */
 
 		void debug_showOpen()
 		{
 			cout << "OpenList :" << endl;
-			for(int i=0; i<5; i++)
-				cout << m_openList[i].empty << " - (" << m_openList[i].x << "," << m_openList[i].y << ") f_cost=" <<  m_openList[i].f_cost << " dist=" <<  m_openList[i].dist << " t_cost=" <<  m_openList[i].t_cost <<  endl;
+			debug_showList(m_openList, 5);
 		}	
 		void debug_showClosed()
 		{
 			cout << "ClosedList :" << endl;
-			for(int i=0; i<10; i++)
-				cout << m_closedList[i].empty << " - (" << m_closedList[i].x << "," << m_closedList[i].y << ") f_cost=" <<  m_closedList[i].f_cost << " dist=" <<  m_closedList[i].dist << " t_cost=" <<  m_closedList[i].t_cost <<  endl;
-		}
-
-		void debug_showTile(Tile tile)
-		{
-
-			cout << endl <<  "Tile=(" << tile.x << "," << tile.y << ") empty=" << tile.empty << " f_cost=" << tile.f_cost << " dist=" << tile.dist << " t_cost=" << tile.t_cost << endl;
+			debug_showList(m_closedList, 10);
 		}
 		void debug_showNeighbour(Tile* tiles)
 		{
 			cout << "Neighbours :" << endl;
-			for(int i=0; i<4; i++)
-				cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ") f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << endl;;
-
+			debug_showList(tiles,4);
 		}
+		void debug_showTile(Tile tile)
+		{
+			cout << endl <<  "Tile=(" << tile.x << "," << tile.y << ") empty=" << tile.empty << " f_cost=" << tile.f_cost << " dist=" << tile.dist << " t_cost=" << tile.t_cost << endl;
+		}
+		void debug_showList(Tile* tiles, int size)
+		{
+			for(int i=0; i<size; i++)
+				cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ") f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << " p_x=" << tiles[i].p_x << " p_y=" << tiles[i].p_y << endl;;
+		}
+
 
 };
 

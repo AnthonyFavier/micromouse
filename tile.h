@@ -9,6 +9,8 @@ struct Tile
 	int x;
 	int y;
 	bool empty;
+	int p_x;
+	int p_y;
 };
 
 #endif
