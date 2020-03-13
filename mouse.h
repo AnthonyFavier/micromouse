@@ -192,6 +192,15 @@ class Mouse
 
 				// to end
 				int h_cost=0;
+				if(tile->x <= MAZE_WIDTH/2-1 && tile->y <= MAZE_WIDTH/2-1)
+					h_cost=(MAZE_WIDTH/2-1 - tile->x)+(MAZE_WIDTH/2-1 - tile->y);
+				else if(tile->x <= MAZE_WIDTH/2-1 && tile->y >= MAZE_WIDTH/2)
+					h_cost=(MAZE_WIDTH/2-1 - tile->x)+(tile->y - MAZE_WIDTH/2);
+				else if(tile->x >= MAZE_WIDTH/2 && tile->y >= MAZE_WIDTH/2)
+					h_cost=(tile->x - MAZE_WIDTH/2)+(tile->y - MAZE_WIDTH/2);
+				else if(tile->x >= MAZE_WIDTH/2 && tile->y <= MAZE_WIDTH/2-1)
+					h_cost=(tile->x - MAZE_WIDTH/2)+(MAZE_WIDTH/2-1 - tile->y);
+
 
 				// f_cost compute
 				int f_cost=g_cost+h_cost;
@@ -204,7 +213,7 @@ class Mouse
 		{
 			if(!tile->empty)
 			{
-				tile->dist=1; // 
+				tile->dist=0; // 
 
 				tile->t_cost = tile->f_cost + tile->dist;
 			}
