@@ -1,10 +1,6 @@
 #ifndef DEF_MAZE
 #define DEF_MAZE
 
-
-#define MAZE_WIDTH 6
-// Pair !!!
-
 #include <iostream>
 
 #include "tile.h"

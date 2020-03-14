@@ -1,6 +1,9 @@
 #ifndef DEF_TILE
 #define DEF_TILE
 
+#define MAZE_WIDTH 6
+// Pair !!!
+
 struct Tile
 {
 	int f_cost;
@@ -11,6 +14,7 @@ struct Tile
 	bool empty;
 	int p_x;
 	int p_y;
+	char directions[36];
 };
 
 #endif

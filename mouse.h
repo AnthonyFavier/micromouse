@@ -6,12 +6,15 @@
 #include "maze.h"
 #include "tile.h"
 
+#define DIR_EMP 'e'
 
 class Mouse
 {
 	private:
 		int m_x;
 		int m_y;
+		int m_last_x;
+		int m_last_y;
 
 		int m_start_x;
 		int m_start_y;
@@ -30,6 +33,8 @@ class Mouse
 		{
 			m_start_x=0;
 			m_start_y=0;
+			m_last_x=m_start_x;
+			m_last_y=m_start_y;
 
 			m_x=m_start_x;
 			m_y=m_start_y;
@@ -42,6 +47,7 @@ class Mouse
 			vide.t_cost=-1;
 			vide.p_x=-1;
 			vide.p_y=-1;
+			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++){vide.directions[i]=DIR_EMP;}
 
 			m_end_x=-1;
 			m_end_y=-1;
@@ -71,7 +77,7 @@ class Mouse
 			m_mazeInt.setWallUp(m_x,m_y,wallUp);
 			m_mazeInt.setWallDown(m_x,m_y,wallDown);
 			m_mazeInt.setWallLeft(m_x,m_y,wallLeft);
-			m_mazeInt.setWallRight(m_x,m_y,wallRight);	
+			m_mazeInt.setWallRight(m_x,m_y,wallRight);
 		}
 
 		void showMap()
@@ -82,29 +88,62 @@ class Mouse
 		void moveUp()
 		{
 			if(m_mazeInt.getWallUp(m_x,m_y)==0)
+			{
+				for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					int j;
+					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
+					m_openList[i].directions[j]='d';
+				}
+				m_last_x=m_x;
 				m_x++;
+			}
 		}
 		void moveDown()
 		{
 			if(m_mazeInt.getWallDown(m_x,m_y)==0)
+			{
+				for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					int j;
+					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
+					m_openList[i].directions[j]='u';
+				}
+				m_last_x=m_x;
 				m_x--;
+			}
 		}
 		void moveRight()
 		{
 			if(m_mazeInt.getWallRight(m_x,m_y)==0)
+			{
+				for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					int j;
+					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
+					m_openList[i].directions[j]='l';
+				}
+				m_last_y=m_y;
 				m_y++;
+			}
 		}
 		void moveLeft()
 		{
 			if(m_mazeInt.getWallLeft(m_x,m_y)==0)
+			{
+				for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					int j;
+					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
+					m_openList[i].directions[j]='r';
+				}
+				m_last_y=m_y;
 				m_y--;
+			}
 		}
 
 		Tile getOpenLowestCost()
 		{
-			//update costs
-			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
-				updateCost(m_openList+i);
 
 			// search for lowest cost tile // add distance from itself
 			int i_min=0;
@@ -156,6 +195,7 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x+1;
 				neighbour[index].y=m_y;
+				neighbour[index].directions[0]='u';
 				index++;
 			}
 			if(!m_mazeInt.getWallDown(m_x,m_y)
@@ -164,6 +204,7 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x-1;
 				neighbour[index].y=m_y;
+				neighbour[index].directions[0]='d';
 				index++;
 			}
 			if(!m_mazeInt.getWallRight(m_x,m_y)
@@ -172,6 +213,7 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
 				neighbour[index].y=m_y+1;
+				neighbour[index].directions[0]='r';
 				index++;
 			}
 			if(!m_mazeInt.getWallLeft(m_x,m_y)
@@ -180,6 +222,7 @@ class Mouse
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
 				neighbour[index].y=m_y-1;
+				neighbour[index].directions[0]='l';
 				index++;
 			}
 		}
@@ -233,18 +276,66 @@ class Mouse
 			}
 		}
 
-		void updateCost(Tile* tile)
+		void updateCosts()
 		{
-			if(!tile->empty)
+			int dist=0;
+
+			// clean des directions
+			bool erreur;
+			int index_last_dir;
+			for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
-				tile->dist=0; // 
+				erreur=false;
+				dist=0;
 
-				tile->t_cost = tile->f_cost + tile->dist;
+				index_last_dir=0;
+				// u r r u l r d r d
+				// u r r u     d r d
+				// u r r         r d
+				for(int j=1; m_openList[i].directions[j]!=DIR_EMP && i<MAZE_WIDTH*MAZE_WIDTH; j++)
+				{
+					if((m_openList[i].directions[j]=='u' && m_openList[i].directions[index_last_dir]=='d')
+					||(m_openList[i].directions[j]=='d' && m_openList[i].directions[index_last_dir]=='u')
+					||(m_openList[i].directions[j]=='r' && m_openList[i].directions[index_last_dir]=='l')
+					||(m_openList[i].directions[j]=='l' && m_openList[i].directions[index_last_dir]=='r'))
+					{
+						erreur=true;
+						m_openList[i].directions[j]=DIR_EMP;
+						m_openList[i].directions[index_last_dir]=DIR_EMP;
+						index_last_dir--;
+					}
+					else
+						index_last_dir++;
+						while(m_openList[i].directions[index_last_dir]==DIR_EMP && index_last_dir<MAZE_WIDTH*MAZE_WIDTH)
+							index_last_dir++;
+				}
+
+				if(erreur)
+				{
+					char back_dir[MAZE_WIDTH*MAZE_WIDTH];
+					for(int j=0; j<MAZE_WIDTH*MAZE_WIDTH; j++){back_dir[j]=DIR_EMP;}
+					int index=0;
+
+					// clean
+					for(int k=0; k<MAZE_WIDTH*MAZE_WIDTH; k++)
+					{
+						if(m_openList[i].directions[k]!=DIR_EMP)
+						{
+							back_dir[index]=m_openList[i].directions[k];
+							m_openList[i].directions[k]=DIR_EMP;
+							index++;
+						}
+					}
+					for(int j=0; j<index; j++)
+						m_openList[i].directions[j]=back_dir[j];
+				}
+
+				for(int j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++)
+					dist++;
+
+				m_openList[i].dist=dist;
+				m_openList[i].t_cost=m_openList[i].f_cost+m_openList[i].dist;
 			}
-		}
-
-		void setPath(Tile* tile)
-		{
 		}
 
 		bool isPathShorter(Tile current, Tile neighbour)
@@ -253,12 +344,12 @@ class Mouse
 		}
 
 		bool isInClosed(int x, int y)
-		{	
+		{
 			bool found=false;
 			for(int i=0; !found && !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
 				if(m_closedList[i].x==x && m_closedList[i].y==y)
-					found=true; 
+					found=true;
 			}
 			return found;
 		}
@@ -269,7 +360,7 @@ class Mouse
 			for(int i=0; !found && !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
 				if(m_openList[i].x==x && m_openList[i].y==y)
-					found=true; 
+					found=true;
 			}
 			return found;
 		}
@@ -327,7 +418,7 @@ class Mouse
 			cout << "(" << m_end_x << "," << m_end_y << ")<-";
 			cout << "(" << cp_x << "," << cp_y << ")<-";
 
-			// follow parents	
+			// follow parents
 			while(cp_x!=m_start_x || cp_y!=m_start_y)
 			{
 				for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
@@ -356,6 +447,35 @@ class Mouse
 			start.t_cost=0;
 			start.p_x=-1;
 			start.p_y=-1;
+			for(int i=0;i<MAZE_WIDTH*MAZE_WIDTH;i++){start.directions[i]=DIR_EMP;}
+
+			/*// u r r u l r d r d
+			Tile test;
+			test.empty=false;
+			test.x=6;
+			test.y=9;
+			for(int i=0;i<MAZE_WIDTH*MAZE_WIDTH;i++){test.directions[i]=DIR_EMP;}
+			test.directions[0]='u';
+			test.directions[1]='r';
+			test.directions[2]='r';
+			test.directions[3]='u';
+			test.directions[4]='l';
+			test.directions[5]='r';
+			test.directions[6]='d';
+			test.directions[7]='r';
+			test.directions[8]='d';
+			test.directions[9]='u';
+			test.directions[10]='l';
+			addInOpen(test);
+			updateCosts();
+			cout<< "directions: ";
+			for(int i=0; test.directions[i]!=DIR_EMP; i++)
+				cout << test.directions[i];	
+			cout << endl;
+			for(int i=0; m_openList[0].directions[i]!=DIR_EMP; i++)
+				cout << m_openList[0].directions[i];
+			cout << endl;
+			while(1){}*/
 
 			// add start node
 			addInOpen(start);
@@ -371,8 +491,9 @@ class Mouse
 			while(1)
 			{
 				cout << endl << "avant" << endl;
-				debug_showOpen();
 
+				updateCosts();
+				debug_showOpen();
 				current=getOpenLowestCost();
 
 				cout << "need to go to : ";
@@ -415,13 +536,11 @@ class Mouse
 					{
 						setParent(neighbour+i,current.x,current.y);
 						setFCost(neighbour+i);
-						setPath(neighbour+i);
 					}
 					else if(!isInOpen(neighbour[i].x, neighbour[i].y))
 					{
 						setParent(neighbour+i,current.x,current.y);
 						setFCost(neighbour+i);
-						setPath(neighbour+i);
 
 						addInOpen(neighbour[i]);
 					}
@@ -460,7 +579,7 @@ class Mouse
 		{
 			cout << "OpenList :" << endl;
 			debug_showList(m_openList, 5);
-		}	
+		}
 		void debug_showClosed()
 		{
 			cout << "ClosedList :" << endl;
