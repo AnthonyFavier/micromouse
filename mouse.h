@@ -297,6 +297,7 @@ class Mouse
 						}
 					}
 				}
+				tile->g_cost=g_cost;
 
 				// to end
 				int h_cost=0;
@@ -308,11 +309,10 @@ class Mouse
 					h_cost=(tile->x - MAZE_WIDTH/2)+(tile->y - MAZE_WIDTH/2);
 				else if(tile->x >= MAZE_WIDTH/2 && tile->y <= MAZE_WIDTH/2-1)
 					h_cost=(tile->x - MAZE_WIDTH/2)+(MAZE_WIDTH/2-1 - tile->y);
+				tile->h_cost=h_cost;
 
 				// f_cost compute
-				int f_cost=g_cost+h_cost;
-
-				tile->f_cost=f_cost;
+				tile->f_cost = tile->g_cost + tile->h_cost;
 			}
 		}
 
@@ -380,6 +380,8 @@ class Mouse
 
 		bool isPathShorter(Tile current, Tile neighbour)
 		{
+			if(current.g_cost+1<neighbour.g_cost)
+				return true;
 			return false;
 		}
 
@@ -526,17 +528,17 @@ class Mouse
 
 				for(int i=0; !neighbour[i].empty && i<8; i++)
 				{
-					if(isPathShorter(current, neighbour[i]))
-					{
-						setParent(neighbour+i,current.x,current.y);
-						setFCost(neighbour+i);
-					}
-					else if(!isInOpen(neighbour[i].x, neighbour[i].y))
+					if(!isInOpen(neighbour[i].x, neighbour[i].y))
 					{
 						setParent(neighbour+i,current.x,current.y);
 						setFCost(neighbour+i);
 
 						addInOpen(neighbour[i]);
+					}	
+					if(isPathShorter(current, neighbour[i]))
+					{
+						setParent(neighbour+i,current.x,current.y);
+						setFCost(neighbour+i);
 					}
 				}
 

@@ -6,6 +6,8 @@
 
 struct Tile
 {
+	int g_cost;
+	int h_cost;
 	int f_cost;
 	int dist;
 	int t_cost;
