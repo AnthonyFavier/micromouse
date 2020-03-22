@@ -497,7 +497,7 @@ class Mouse
 			// main loop to explore
 			while(1)
 			{
-				cout << endl << "avant" << endl;
+				cout << endl << "main loop" << endl;
 
 				updateCosts();
 				debug_showOpen();
@@ -509,6 +509,7 @@ class Mouse
 
 				goTo(current);
 				//manualGoTo();
+
 				checkWalls(mazeExt);
 
 				if(isDestination(current))
@@ -521,7 +522,6 @@ class Mouse
 				}
 
 				lookForNeighbour(neighbour); // return neighbour traversable and not in CLOSED
-
 				debug_showNeighbour(neighbour);
 
 				for(int i=0; !neighbour[i].empty && i<8; i++)
@@ -599,8 +599,6 @@ class Mouse
 				cout << endl;
 			}
 		}
-
-
 };
 
 #endif
