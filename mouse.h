@@ -24,6 +24,9 @@ class Mouse
 		int m_end_x;
 		int m_end_y;
 
+		int m_state;
+		enum STATES{EXPLORE_PATH, EXPLORE_OPTI, RUN};
+
 		Maze m_mazeInt;
 		Tile m_openList[MAZE_WIDTH*MAZE_WIDTH];
 		Tile m_closedList[MAZE_WIDTH*MAZE_WIDTH];
@@ -33,6 +36,8 @@ class Mouse
 	public:
 		Mouse()
 		{
+			m_state=EXPLORE_PATH;
+
 			m_start_x=0;
 			m_start_y=0;
 			m_last_x=m_start_x;
@@ -547,30 +552,22 @@ class Mouse
 			}
 		}
 
-		/*
-		   A* algorithm
-		   OPEN
-		   CLOSED
-		   add te start node to OPEN
-
-		   loop
-		   current = node in OPEN with the lowest f_cost
-		   remove current from OPEN
-		   add current to CLOSED
-
-		   if current is the target node
-			   return
-
-		   foreach neighbour of the current node
-			   if neighbour is not traversable or nieghbour is in CLOSED
-			   skip to the next neighbour
-
-			   if new path to neighbour is shorter OR neighbour is not in OPEN
-				   set f_cost of neighbour
-				   set parent of neighbour to current
-				   if neighbour is not in OPEN
-					   add neighbour to OPEN
-		 */
+		void FSM(Maze* mazeExt)
+		{
+			switch(m_state)
+			{
+				case EXPLORE_PATH:
+					explore(mazeExt);
+					m_state=EXPLORE_OPTI;
+					break;
+				case EXPLORE_OPTI:
+					cout << "hum c'est surement opti" << endl;
+					usleep(DELAY_MS*1000);
+					break;
+				case RUN:
+					break;
+			}
+		}
 
 		void debug_showOpen()
 		{
