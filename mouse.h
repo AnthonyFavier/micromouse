@@ -2,11 +2,13 @@
 #define DEF_MOUSE
 
 #include <iostream>
+#include <unistd.h>
 
 #include "maze.h"
 #include "tile.h"
 
 #define DIR_EMP 'e'
+#define DELAY_MS 500
 
 class Mouse
 {
@@ -48,6 +50,7 @@ class Mouse
 			vide.p_x=-1;
 			vide.p_y=-1;
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++){vide.directions[i]=DIR_EMP;}
+			vide.directions[MAZE_WIDTH*MAZE_WIDTH]='\0';
 
 			m_end_x=-1;
 			m_end_y=-1;
@@ -178,9 +181,46 @@ class Mouse
 
 		void goTo(Tile tile)
 		{
-			//suitCouloir
-			//faitDemiTour
-			//intersection
+			// found first
+			int index=-1;
+			for(index=0; tile.directions[index]!=DIR_EMP && index<=MAZE_WIDTH*MAZE_WIDTH; index++){}
+			index--;
+
+			char dir;
+			while(index>=0)
+			{
+				dir=tile.directions[index];
+
+				if(dir=='u')
+					moveUp();
+				else if(dir=='r')
+					moveRight();
+				else if(dir=='d')
+					moveDown();
+				else if(dir=='l')
+					moveLeft();
+				showMap();
+				index--;
+				usleep(DELAY_MS*1000/2);
+			}
+		}
+
+		void manualGoTo()
+		{
+			string choix="";
+			while(choix!="o")
+			{
+				cin >> choix;
+				if(choix=="z")
+					moveUp();
+				else if(choix=="d")
+					moveRight();
+				else if(choix=="s")
+					moveDown();
+				else if(choix=="q")
+					moveLeft();
+				showMap();
+			}
 		}
 
 		void lookForNeighbour(Tile* neighbour)
@@ -306,8 +346,8 @@ class Mouse
 					}
 					else
 						index_last_dir++;
-						while(m_openList[i].directions[index_last_dir]==DIR_EMP && index_last_dir<MAZE_WIDTH*MAZE_WIDTH)
-							index_last_dir++;
+					while(m_openList[i].directions[index_last_dir]==DIR_EMP && index_last_dir<MAZE_WIDTH*MAZE_WIDTH)
+						index_last_dir++;
 				}
 
 				if(erreur)
@@ -438,44 +478,12 @@ class Mouse
 		void explore(Maze* mazeExt)
 		{
 			// start tile
-			Tile start;
+			Tile start=vide;
 			start.empty=false;
 			start.x=m_start_x;
 			start.y=m_start_y;
 			start.f_cost=0;
-			start.dist=0;
 			start.t_cost=0;
-			start.p_x=-1;
-			start.p_y=-1;
-			for(int i=0;i<MAZE_WIDTH*MAZE_WIDTH;i++){start.directions[i]=DIR_EMP;}
-
-			/*// u r r u l r d r d
-			Tile test;
-			test.empty=false;
-			test.x=6;
-			test.y=9;
-			for(int i=0;i<MAZE_WIDTH*MAZE_WIDTH;i++){test.directions[i]=DIR_EMP;}
-			test.directions[0]='u';
-			test.directions[1]='r';
-			test.directions[2]='r';
-			test.directions[3]='u';
-			test.directions[4]='l';
-			test.directions[5]='r';
-			test.directions[6]='d';
-			test.directions[7]='r';
-			test.directions[8]='d';
-			test.directions[9]='u';
-			test.directions[10]='l';
-			addInOpen(test);
-			updateCosts();
-			cout<< "directions: ";
-			for(int i=0; test.directions[i]!=DIR_EMP; i++)
-				cout << test.directions[i];	
-			cout << endl;
-			for(int i=0; m_openList[0].directions[i]!=DIR_EMP; i++)
-				cout << m_openList[0].directions[i];
-			cout << endl;
-			while(1){}*/
 
 			// add start node
 			addInOpen(start);
@@ -485,7 +493,6 @@ class Mouse
 			Tile neighbour[4];
 			for(int i=0; i<4; i++)
 				neighbour[i]=vide;
-			string choix="";
 
 			// main loop to explore
 			while(1)
@@ -500,21 +507,8 @@ class Mouse
 				debug_showTile(current);
 				showMap();
 
-				//goTo(current);
-				while(choix!="o")
-				{
-					cin >> choix;
-					if(choix=="z")
-						moveUp();
-					else if(choix=="d")
-						moveRight();
-					else if(choix=="s")
-						moveDown();
-					else if(choix=="q")
-						moveLeft();
-					showMap();
-				}
-				choix="";
+				goTo(current);
+				//manualGoTo();
 				checkWalls(mazeExt);
 
 				if(isDestination(current))
@@ -547,6 +541,7 @@ class Mouse
 				}
 
 				showMap();
+				usleep(DELAY_MS*1000);
 			}
 		}
 
@@ -578,26 +573,31 @@ class Mouse
 		void debug_showOpen()
 		{
 			cout << "OpenList :" << endl;
-			debug_showList(m_openList, 5);
+			debug_showList(m_openList, 5, true);
 		}
 		void debug_showClosed()
 		{
 			cout << "ClosedList :" << endl;
-			debug_showList(m_closedList, 10);
+			debug_showList(m_closedList, 10, true);
 		}
 		void debug_showNeighbour(Tile* tiles)
 		{
 			cout << "Neighbours :" << endl;
-			debug_showList(tiles,4);
+			debug_showList(tiles,4,false);
 		}
 		void debug_showTile(Tile tile)
 		{
 			cout << endl <<  "Tile=(" << tile.x << "," << tile.y << ") empty=" << tile.empty << " f_cost=" << tile.f_cost << " dist=" << tile.dist << " t_cost=" << tile.t_cost << endl;
 		}
-		void debug_showList(Tile* tiles, int size)
+		void debug_showList(Tile* tiles, int size, bool full)
 		{
 			for(int i=0; i<size; i++)
-				cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ") f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << " p_x=" << tiles[i].p_x << " p_y=" << tiles[i].p_y << endl;;
+			{
+				cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ")";
+				if(full)
+					cout << " f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << endl << "\tdirection:" << tiles[i].directions;
+				cout << endl;
+			}
 		}
 
 

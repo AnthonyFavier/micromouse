@@ -14,7 +14,7 @@ struct Tile
 	bool empty;
 	int p_x;
 	int p_y;
-	char directions[36];
+	char directions[MAZE_WIDTH*MAZE_WIDTH+1];
 };
 
 #endif
