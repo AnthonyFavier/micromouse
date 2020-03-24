@@ -18,8 +18,7 @@ class Mouse
 		int m_last_x;
 		int m_last_y;
 
-		int m_start_x;
-		int m_start_y;
+		Tile m_start;
 
 		int m_end_x;
 		int m_end_y;
@@ -38,13 +37,8 @@ class Mouse
 		{
 			m_state=EXPLORE_PATH;
 
-			m_start_x=0;
-			m_start_y=0;
 			m_last_x=m_start_x;
 			m_last_y=m_start_y;
-
-			m_x=m_start_x;
-			m_y=m_start_y;
 
 			vide.empty=true;
 			vide.x=-1;
@@ -58,6 +52,17 @@ class Mouse
 			vide.p_y=-1;
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++){vide.directions[i]=DIR_EMP;}
 			vide.directions[MAZE_WIDTH*MAZE_WIDTH]='\0';
+
+			m_start=vide;
+			m_start.empty=false;
+			m_start.f_cost=0;
+			m_start.t_cost=0;
+			m_start.x=0;
+			m_start.y=0;
+
+			m_x=m_start.x;
+			m_y=m_start.y;
+
 
 			m_end_x=-1;
 			m_end_y=-1;
@@ -288,7 +293,7 @@ class Mouse
 				int g_cost=1;
 				int cp_x=tile->p_x;
 				int cp_y=tile->p_y;
-				while(cp_x!=m_start_x || cp_y!=m_start_y)
+				while(cp_x!=m_start.x || cp_y!=m_start.y)
 				{
 					for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 					{
@@ -469,7 +474,7 @@ class Mouse
 			cout << "(" << cp_x << "," << cp_y << ")<-";
 
 			// follow parents
-			while(cp_x!=m_start_x || cp_y!=m_start_y)
+			while(cp_x!=m_start.x || cp_y!=m_start.y)
 			{
 				for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 				{
@@ -495,16 +500,8 @@ class Mouse
 
 		void explore(Maze* mazeExt)
 		{
-			// start tile
-			Tile start=vide;
-			start.empty=false;
-			start.x=m_start_x;
-			start.y=m_start_y;
-			start.f_cost=0;
-			start.t_cost=0;
-
 			// add start node
-			addInOpen(start);
+			addInOpen(m_start);
 
 			// variables
 			Tile current;
