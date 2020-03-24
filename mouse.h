@@ -16,10 +16,9 @@ class Mouse
 		int m_x;
 		int m_y;
 
+		Tile vide;
 		Tile m_start;
-
-		int m_end_x;
-		int m_end_y;
+		Tile m_end;
 
 		int m_state;
 		enum STATES{EXPLORE_PATH, EXPLORE_OPTI, RUN};
@@ -28,7 +27,6 @@ class Mouse
 		Tile m_openList[MAZE_WIDTH*MAZE_WIDTH];
 		Tile m_closedList[MAZE_WIDTH*MAZE_WIDTH];
 
-		Tile vide;
 
 	public:
 		Mouse()
@@ -58,9 +56,7 @@ class Mouse
 			m_x=m_start.x;
 			m_y=m_start.y;
 
-
-			m_end_x=-1;
-			m_end_y=-1;
+			m_end=vide;
 
 			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
@@ -452,7 +448,7 @@ class Mouse
 			int cp_y=-1;
 			for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
-				if(m_closedList[i].x==m_end_x && m_closedList[i].y==m_end_y)
+				if(m_closedList[i].x==m_end.x && m_closedList[i].y==m_end.y)
 				{
 					cp_x=m_closedList[i].p_x;
 					cp_y=m_closedList[i].p_y;
@@ -461,7 +457,7 @@ class Mouse
 			}
 
 			cout << "Path :" << endl;
-			cout << "(" << m_end_x << "," << m_end_y << ")<-";
+			cout << "(" << m_end.x << "," << m_end.y << ")<-";
 			cout << "(" << cp_x << "," << cp_y << ")<-";
 
 			// follow parents
@@ -520,8 +516,7 @@ class Mouse
 				if(isDestination(current))
 				{
 					cout << "exploration over !" << endl;
-					m_end_x=current.x;
-					m_end_y=current.y;
+					m_end=current;
 					computeOptPath();
 					break;
 				}
