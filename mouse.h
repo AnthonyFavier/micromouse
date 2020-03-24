@@ -7,7 +7,7 @@
 #include "maze.h"
 #include "tile.h"
 
-#define DIR_EMP 'e'
+#define DIR_EMP '.'
 #define DELAY_MS 500
 
 class Mouse
@@ -50,6 +50,8 @@ class Mouse
 			vide.x=-1;
 			vide.y=-1;
 			vide.dist=0;
+			vide.g_cost=-1;
+			vide.h_cost=-1;
 			vide.f_cost=-1;
 			vide.t_cost=-1;
 			vide.p_x=-1;
@@ -157,17 +159,14 @@ class Mouse
 			int i_min=0;
 			int cost_min=m_openList[0].t_cost;
 			int dist=m_openList[0].dist;
-			for(int i=1; i<MAZE_WIDTH*MAZE_WIDTH; i++)
+			for(int i=1; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
-				if(!m_openList[i].empty)
+				if((m_openList[i].t_cost<cost_min)
+						|| (m_openList[i].t_cost==cost_min && m_openList[i].dist<dist))
 				{
-					if((m_openList[i].t_cost<cost_min)
-							|| (m_openList[i].t_cost==cost_min && m_openList[i].dist<dist))
-					{
-						i_min=i;
-						cost_min=m_openList[i].t_cost;
-						dist=m_openList[i].dist;
-					}
+					i_min=i;
+					cost_min=m_openList[i].t_cost;
+					dist=m_openList[i].dist;
 				}
 			}
 			Tile tile;
@@ -354,7 +353,6 @@ class Mouse
 					while(m_openList[i].directions[index_last_dir]==DIR_EMP && index_last_dir<MAZE_WIDTH*MAZE_WIDTH)
 						index_last_dir++;
 				}
-
 				if(erreur)
 				{
 					char back_dir[MAZE_WIDTH*MAZE_WIDTH];
@@ -375,17 +373,22 @@ class Mouse
 						m_openList[i].directions[j]=back_dir[j];
 				}
 
+				// calcul dist
 				for(int j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++)
 					dist++;
-
 				m_openList[i].dist=dist;
+
+				// update cost
 				m_openList[i].t_cost=m_openList[i].f_cost+m_openList[i].dist;
 			}
 		}
 
-		bool isPathShorter(Tile current, Tile neighbour)
+		bool isPathShorter(int current_g, int neigh_x, int neigh_y)
 		{
-			if(current.g_cost+1<neighbour.g_cost)
+			int i;
+			for(i=0; (m_openList[i].x!=neigh_x || m_openList[i].y!=neigh_y) && !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++){}
+			int neighbour_g=m_openList[i].g_cost;
+			if(current_g+1<neighbour_g)
 				return true;
 			return false;
 		}
@@ -482,6 +485,14 @@ class Mouse
 			cout << endl;
 		}
 
+		void replaceInOpen(Tile tile)
+		{
+			int i;
+			for(i=0; (m_openList[i].x!=tile.x || m_openList[i].y!=tile.y) && !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++){}
+
+			m_openList[i]=tile;
+		}
+
 		void explore(Maze* mazeExt)
 		{
 			// start tile
@@ -506,7 +517,6 @@ class Mouse
 			{
 				cout << endl << "main loop" << endl;
 
-				updateCosts();
 				debug_showOpen();
 				current=getOpenLowestCost();
 
@@ -540,12 +550,15 @@ class Mouse
 
 						addInOpen(neighbour[i]);
 					}	
-					if(isPathShorter(current, neighbour[i]))
+					else if(isPathShorter(current.g_cost, neighbour[i].x, neighbour[i].y))
 					{
 						setParent(neighbour+i,current.x,current.y);
 						setFCost(neighbour+i);
+
+						replaceInOpen(neighbour[i]);
 					}
 				}
+				updateCosts();
 
 				showMap();
 				usleep(DELAY_MS*1000);
@@ -562,7 +575,7 @@ class Mouse
 					break;
 				case EXPLORE_OPTI:
 					cout << "hum c'est surement opti" << endl;
-					usleep(DELAY_MS*1000);
+					usleep(DELAY_MS*10000);
 					break;
 				case RUN:
 					break;
@@ -592,10 +605,13 @@ class Mouse
 		{
 			for(int i=0; i<size; i++)
 			{
-				cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ")";
-				if(full)
-					cout << " f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << endl << "\tdirection:" << tiles[i].directions;
-				cout << endl;
+				if(!tiles[i].empty)
+				{
+					cout << tiles[i].empty << " - (" << tiles[i].x << "," << tiles[i].y << ")";
+					if(full)
+						cout << " f_cost=" << tiles[i].f_cost << " dist=" << tiles[i].dist << " t_cost=" << tiles[i].t_cost << endl << "\tdirection:" << tiles[i].directions << " p=(" << tiles[i].p_x << "," << tiles[i].p_y << ")";
+					cout << endl;
+				}
 			}
 		}
 };
