@@ -15,8 +15,6 @@ class Mouse
 	private:
 		int m_x;
 		int m_y;
-		int m_last_x;
-		int m_last_y;
 
 		Tile m_start;
 
@@ -36,9 +34,6 @@ class Mouse
 		Mouse()
 		{
 			m_state=EXPLORE_PATH;
-
-			m_last_x=m_start_x;
-			m_last_y=m_start_y;
 
 			vide.empty=true;
 			vide.x=-1;
@@ -110,7 +105,6 @@ class Mouse
 					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
 					m_openList[i].directions[j]='d';
 				}
-				m_last_x=m_x;
 				m_x++;
 			}
 		}
@@ -124,7 +118,6 @@ class Mouse
 					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
 					m_openList[i].directions[j]='u';
 				}
-				m_last_x=m_x;
 				m_x--;
 			}
 		}
@@ -138,7 +131,6 @@ class Mouse
 					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
 					m_openList[i].directions[j]='l';
 				}
-				m_last_y=m_y;
 				m_y++;
 			}
 		}
@@ -152,7 +144,6 @@ class Mouse
 					for(j=0; m_openList[i].directions[j]!=DIR_EMP && j<MAZE_WIDTH*MAZE_WIDTH; j++){}
 					m_openList[i].directions[j]='r';
 				}
-				m_last_y=m_y;
 				m_y--;
 			}
 		}
