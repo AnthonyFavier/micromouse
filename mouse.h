@@ -432,9 +432,7 @@ class Mouse
 			}
 
 			for(int i=0; i<index_back; i++)
-			{
 				m_openList[i]=back[i];
-			}
 		}
 
 		void setParent(Tile* neighbour, int x, int y)
@@ -553,6 +551,68 @@ class Mouse
 			}
 		}
 
+		void exploreOpti(Maze* mazeExt)
+		{/*
+			// variables
+			Tile current;
+			Tile neighbour[4];
+			for(int i=0; i<4; i++)
+				neighbour[i]=vide;
+
+			// main loop to explore
+			while(1)
+			{
+				cout << endl << "opti loop" << endl;
+
+				cleanOptOpen();
+
+				debug_showOpen();
+				current=getOpenLowestCost();
+
+				cout << "need to go to : ";
+				debug_showTile(current);
+				showMap();
+
+				goTo(current);
+				//manualGoTo();
+
+				checkWalls(mazeExt);
+
+				if(isOpenEmpty())
+				{
+					// suppose qu'il y a tjrs qu'une entrée pour sortie
+					cout << "exploration opti !" << endl;
+					computeOptPath();
+					break;
+				}
+
+				lookForNeighbour(neighbour); // return neighbour traversable and not in CLOSED
+				debug_showNeighbour(neighbour);
+
+				for(int i=0; !neighbour[i].empty && i<8; i++)
+				{
+					if(!isInOpen(neighbour[i].x, neighbour[i].y))
+					{
+						setParent(neighbour+i,current.x,current.y);
+						setFCost(neighbour+i);
+
+						addInOpen(neighbour[i]);
+					}	
+					else if(isPathShorter(current.g_cost, neighbour[i].x, neighbour[i].y))
+					{
+						setParent(neighbour+i,current.x,current.y);
+						setFCost(neighbour+i);
+
+						replaceInOpen(neighbour[i]);
+					}
+				}
+				updateCosts();
+
+				showMap();
+				usleep(DELAY_MS*1000);
+			}*/
+		}
+
 		void FSM(Maze* mazeExt)
 		{
 			switch(m_state)
@@ -562,8 +622,8 @@ class Mouse
 					m_state=EXPLORE_OPTI;
 					break;
 				case EXPLORE_OPTI:
-					cout << "hum c'est surement opti" << endl;
-					usleep(DELAY_MS*10000);
+					exploreOpti(mazeExt);
+					m_state=RUN;
 					break;
 				case RUN:
 					break;

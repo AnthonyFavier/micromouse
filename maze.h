@@ -71,7 +71,7 @@ class Maze
 			m_walls_v[4][1]=WALL;
 			m_walls_v[0][2]=WALL;
 			m_walls_v[4][2]=WALL;
-			m_walls_h[5][2]=WALL;
+			//m_walls_h[5][2]=WALL;
 			m_walls_h[5][3]=WALL;
 			m_walls_h[5][4]=WALL;
 			m_walls_v[3][5]=WALL;
