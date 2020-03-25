@@ -274,7 +274,7 @@ class Maze
 
 		}
 
-		void showPath(int x, int y, Tile* closedList, Tile* path, Tile start, Tile end)
+		void showPath(int x, int y, Tile* closedList, Tile* openList, Tile* path, Tile start, Tile end)
 		{
 			cout << endl;
 			// Top horizontal
@@ -304,7 +304,9 @@ class Maze
 							cout << " X ";
 						else
 						{
-							if(isInClosed(closedList,i,j))
+							if(isInOpen(openList,i,j))
+								cout << RED << " ¤ " << RESET;
+							else if(isInClosed(closedList,i,j))
 							{
 								if(isInPath(path,i,j))
 									cout << BOLDGREEN << " ¤ " << RESET;

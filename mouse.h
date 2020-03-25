@@ -102,7 +102,7 @@ class Mouse
 
 		void showMapPath()
 		{
-			m_mazeInt.showPath(m_x,m_y,m_closedList,m_path,m_start,m_end);
+			m_mazeInt.showPath(m_x,m_y,m_closedList,m_openList,m_path,m_start,m_end);
 		}
 
 		void moveUp()
