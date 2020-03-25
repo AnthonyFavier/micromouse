@@ -20,6 +20,8 @@ class Mouse
 		Tile m_start;
 		Tile m_end;
 
+		int m_path_length;
+
 		int m_state;
 		enum STATES{EXPLORE_PATH, EXPLORE_OPTI, RUN};
 
@@ -446,6 +448,7 @@ class Mouse
 			// search for end tile in closed
 			int cp_x=-1;
 			int cp_y=-1;
+			m_path_length=1;
 			for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
 				if(m_closedList[i].x==m_end.x && m_closedList[i].y==m_end.y)
@@ -469,12 +472,14 @@ class Mouse
 					{
 						cp_x=m_closedList[i].p_x;
 						cp_y=m_closedList[i].p_y;
+						m_path_length++;
 						cout << "(" << cp_x << "," << cp_y << ")<-";
 						break;
 					}
 				}
 			}
 			cout << endl;
+			cout << "path lenght=" << m_path_length << endl;
 		}
 
 		void replaceInOpen(Tile tile)
