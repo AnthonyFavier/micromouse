@@ -174,6 +174,18 @@ class Maze
 			return found;
 		}
 
+		bool isInPath(Tile* path, int x, int y)
+		{
+			bool found=false;
+			for(int i=0; !found && !path[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+			{
+				if(path[i].x==x && path[i].y==y)
+					found=true;
+			}
+			return found;
+
+		}
+
 		void show()
 		{
 			show(-1,-1,NULL,NULL);
@@ -220,6 +232,87 @@ class Maze
 								else
 									cout << " ¤ ";
 							}
+						}
+					}
+				}
+				cout << endl;
+
+				// Horizontal walls (expect bot and top)
+				if(i!=0)
+				{
+					cout << " ";
+					for(int j=0; j<MAZE_WIDTH; j++)
+					{
+						if(m_walls_h[i][j]==1)
+						{
+							cout << "---";
+							if(j!=MAZE_WIDTH-1)
+								cout << " ";
+						}
+						else
+						{
+							cout << " " << m_walls_h[i][j];
+							if(j!=MAZE_WIDTH-1)
+								cout << "  ";
+						}
+					}
+					cout << endl;
+				}
+			}
+
+			// Bot horizontal
+			cout << " ";
+			for(int j=0; j<MAZE_WIDTH; j++)
+			{
+				if(m_walls_h[0][j]==1)
+					cout << "--- ";
+				else
+					cout << " " << m_walls_h[0][j] << "  ";
+			}
+			cout << endl;
+
+
+		}
+
+		void showPath(int x, int y, Tile* closedList, Tile* path, Tile start, Tile end)
+		{
+			cout << endl;
+			// Top horizontal
+			cout << " ";
+			for(int j=0; j<MAZE_WIDTH; j++)
+			{
+				if(m_walls_h[MAZE_WIDTH][j]==1)
+					cout << "--- ";
+				else
+					cout << " " << m_walls_h[MAZE_WIDTH][j] << "  ";
+			}
+			cout << endl;
+
+			// Middle
+			for(int i=MAZE_WIDTH-1; i>=0; i--)
+			{	
+				// Vertical walls
+				for(int j=0; j<MAZE_WIDTH+1; j++)
+				{
+					if(m_walls_v[i][j]==1)
+						cout << "|";
+					else
+						cout << m_walls_v[i][j];
+					if(j!=MAZE_WIDTH)
+					{
+						if(i==x && j==y)
+							cout << " X ";
+						else
+						{
+							if(isInClosed(closedList,i,j))
+							{
+								if(isInPath(path,i,j))
+									cout << BOLDGREEN << " ¤ " << RESET;
+								else
+									cout << GREEN << " ¤ " << RESET;
+							}
+							else
+								cout << " ¤ ";
 						}
 					}
 				}

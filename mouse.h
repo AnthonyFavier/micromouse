@@ -24,6 +24,7 @@ class Mouse
 		Tile m_end; // suppose qu'il y a tjrs qu'une entrée pour sortie
 
 		int m_path_length;
+		Tile m_path[MAZE_WIDTH*MAZE_WIDTH];
 
 		int m_state;
 		enum STATES{EXPLORE_PATH, EXPLORE_OPTI, RUN};
@@ -69,6 +70,7 @@ class Mouse
 			{
 				m_openList[i]=vide;
 				m_closedList[i]=vide;
+				m_path[i]=vide;
 			}
 		}
 
@@ -96,6 +98,11 @@ class Mouse
 		void showMap()
 		{
 			m_mazeInt.show(m_x,m_y,m_openList,m_closedList);
+		}
+
+		void showMapPath()
+		{
+			m_mazeInt.showPath(m_x,m_y,m_closedList,m_path,m_start,m_end);
 		}
 
 		void moveUp()
@@ -536,12 +543,15 @@ class Mouse
 			int cp_y=-1;
 			int length_back=m_path_length;
 			m_path_length=0;
+			for(int i=0; i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				m_path[i]=vide;
 			for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
 				if(m_closedList[i].x==m_end.x && m_closedList[i].y==m_end.y)
 				{
 					cp_x=m_closedList[i].p_x;
 					cp_y=m_closedList[i].p_y;
+					m_path[m_path_length]=m_closedList[i];
 					m_path_length++;
 				}
 			}
@@ -561,6 +571,7 @@ class Mouse
 					{
 						cp_x=m_closedList[i].p_x;
 						cp_y=m_closedList[i].p_y;
+						m_path[m_path_length]=m_closedList[i];
 						m_path_length++;
 						cout << "(" << cp_x << "," << cp_y << ")<-";
 						found=true;
@@ -574,6 +585,7 @@ class Mouse
 						{
 							cp_x=m_openList[i].p_x;
 							cp_y=m_openList[i].p_y;
+							m_path[m_path_length]=m_closedList[i];
 							m_path_length++;
 							cout << "(" << cp_x << "," << cp_y << ")<-";
 							found=true;
@@ -582,7 +594,7 @@ class Mouse
 				}
 			}
 			cout << endl;
-			cout << "path lenght=" << m_path_length << endl;
+			cout << "path length=" << m_path_length << endl;
 			if(length_back!=m_path_length)
 				cout << "=> NEW PATH !!! <=" << endl;
 		}
@@ -724,9 +736,11 @@ class Mouse
 
 				if(isDestination(current))
 				{
-					cout << "exploration over !" << endl;
+					returnStart();
+					cout << endl << "exploration over !" << endl;
 					m_end=current;
 					computeOptPath();
+					showMapPath();
 					break;
 				}
 
@@ -766,8 +780,6 @@ class Mouse
 			Tile neighbour[4];
 			for(int i=0; i<4; i++)
 				neighbour[i]=vide;
-
-			returnStart();
 
 			// main loop to explore
 			while(1)
@@ -839,6 +851,7 @@ class Mouse
 					returnStart();
 					cout << endl << "exploration opti !" << endl;
 					computeOptPath();
+					showMapPath();
 					break;
 				}
 
@@ -854,10 +867,12 @@ class Mouse
 				case EXPLORE_PATH:
 					explore(mazeExt);
 					m_state=EXPLORE_OPTI;
+					sleep(2);
 					break;
 				case EXPLORE_OPTI:
 					exploreOpti(mazeExt);
 					m_state=RUN;
+					sleep(2);
 					break;
 				case RUN:
 					sleep(1);
