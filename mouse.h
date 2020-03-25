@@ -179,9 +179,7 @@ class Mouse
 			removeOpen(i_min);
 
 			// add current to closed
-			int n;
-			for(n=0; !m_closedList[n].empty && n<MAZE_WIDTH*MAZE_WIDTH-1; n++){} // attention n<
-			m_closedList[n]=tile;
+			addInClosed(tile);
 
 			return tile;
 		}
@@ -480,6 +478,13 @@ class Mouse
 			m_openList[i]=tile;
 		}
 
+		void addInClosed(Tile tile)
+		{
+			int i;
+			for(i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH-1; i++){} // attention i<
+			m_closedList[i]=tile;
+		}
+
 		void removeOpen(int index)
 		{
 			m_openList[index]=vide;
@@ -529,6 +534,7 @@ class Mouse
 			// search parent of end tile in closed
 			int cp_x=-1;
 			int cp_y=-1;
+			int length_back=m_path_length;
 			m_path_length=0;
 			for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 			{
@@ -577,6 +583,8 @@ class Mouse
 			}
 			cout << endl;
 			cout << "path lenght=" << m_path_length << endl;
+			if(length_back!=m_path_length)
+				cout << "=> NEW PATH !!! <=" << endl;
 		}
 
 		void replaceInOpen(Tile tile)
@@ -597,13 +605,7 @@ class Mouse
 
 		bool isOptiDone()
 		{
-			bool fini=true;
-			for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
-			{
-				if(m_openList[i].g_cost<=m_path_length-2)
-					fini=false;
-			}
-			return fini;
+			return m_openList[0].empty;
 		}
 
 		void moveInOpen(Tile tile)
@@ -621,6 +623,23 @@ class Mouse
 
 			// add in open
 			addInOpen(tile);
+		}
+
+		void moveInClosed(Tile tile)
+		{
+			// find in open
+			int index=-1;
+			for(int i=0; index<0 && !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+			{
+				if(m_openList[i].x == tile.x && m_openList[i].y == tile.y)
+					index=i;
+			}
+
+			// remove from open
+			removeOpen(index);
+
+			// add in closed
+			addInClosed(tile);
 		}
 
 		void returnStart()
@@ -651,10 +670,28 @@ class Mouse
 				}
 
 				showMap();
-				usleep(DELAY_MS*1000);
+				usleep(DELAY_MS*1000/2);
 			}
 
 			updateCosts();
+		}
+
+		void cleanOpen()
+		{
+			bool changement;
+			do
+			{
+				changement=false;
+				for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					if(m_openList[i].g_cost>m_path_length-2)
+					{
+						moveInClosed(m_openList[i]);
+						changement=true;
+						break;
+					}
+				}
+			}while(changement);
 		}
 
 		void explore(Maze* mazeExt)
@@ -795,10 +832,12 @@ class Mouse
 					}
 				}
 				updateCosts();
+				cleanOpen();
 
 				if(isOptiDone())
 				{
-					cout << "exploration opti !" << endl;
+					returnStart();
+					cout << endl << "exploration opti !" << endl;
 					computeOptPath();
 					break;
 				}
