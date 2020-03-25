@@ -623,6 +623,40 @@ class Mouse
 			addInOpen(tile);
 		}
 
+		void returnStart()
+		{
+			while(m_x!=m_start.x || m_y!=m_start.y)
+			{
+				for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+				{
+					if(m_closedList[i].x==m_x && m_closedList[i].y==m_y)
+					{
+						// move
+						if(m_closedList[i].p_y==m_y)
+						{
+							if(m_closedList[i].p_x==m_x+1)
+								moveUp();
+							else
+								moveDown();
+						}
+						else
+						{
+							if(m_closedList[i].p_y==m_y+1)
+								moveRight();
+							else
+								moveLeft();
+						}
+						break;
+					}
+				}
+
+				showMap();
+				usleep(DELAY_MS*1000);
+			}
+
+			updateCosts();
+		}
+
 		void explore(Maze* mazeExt)
 		{
 			// add start node
@@ -696,7 +730,7 @@ class Mouse
 			for(int i=0; i<4; i++)
 				neighbour[i]=vide;
 
-			// return to start ?
+			returnStart();
 
 			// main loop to explore
 			while(1)
