@@ -2,13 +2,16 @@
 #define DEF_MAZE
 
 #include <iostream>
+#include <stdlib.h>
 
 #include "tile.h"
 #include "colors.h"
 
+// affichage 
 #define WALL 1
 #define NOWALL 0
 #define UWALL 5
+#define CELL "¤"
 
 using namespace std;
 
@@ -39,47 +42,64 @@ class Maze
 			//// Vertical walls
 			for(int i=0; i<MAZE_WIDTH; i++)
 			{
-				m_walls_v[i][0]=WALL;
-				for(int j=1; j<MAZE_WIDTH+1-1; j++)
+				for(int j=0; j<MAZE_WIDTH+1; j++)
 					m_walls_v[i][j]=NOWALL;
-				m_walls_v[i][MAZE_WIDTH]=WALL;
 			}
 			//// Horizontal walls
 			for(int j=0; j<MAZE_WIDTH; j++)
 			{
-				m_walls_h[0][j]=WALL;
-				for(int i=1; i<MAZE_WIDTH+1-1; i++)
+				for(int i=0; i<MAZE_WIDTH+1; i++)
 					m_walls_h[i][j]=NOWALL;
-				m_walls_h[MAZE_WIDTH][j]=WALL;
 			}
 
-			// end //
-			//m_walls_h[MAZE_WIDTH/2+1][MAZE_WIDTH/2-1]=WALL;
-			m_walls_h[MAZE_WIDTH/2+1][MAZE_WIDTH/2]=WALL;
-			m_walls_v[MAZE_WIDTH/2][MAZE_WIDTH/2+1]=WALL;
-			m_walls_v[MAZE_WIDTH/2-1][MAZE_WIDTH/2+1]=WALL;
-			m_walls_h[MAZE_WIDTH/2-1][MAZE_WIDTH/2]=WALL;
-			m_walls_h[MAZE_WIDTH/2-1][MAZE_WIDTH/2-1]=WALL;
-			m_walls_v[MAZE_WIDTH/2][MAZE_WIDTH/2-1]=WALL;
-			m_walls_v[MAZE_WIDTH/2-1][MAZE_WIDTH/2-1]=WALL;
-			// start //
-			m_walls_v[0][1]=WALL;
+			FILE* fichier=NULL;
+			fichier=fopen("walls.txt","r");
+			if(fichier==NULL) cout << "ERREUR" << endl;
+			else
+			{
+				char line[10]="";
+				char nombre[10]="";
 
-			// Draw maze
-			m_walls_v[1][1]=WALL;
-			m_walls_h[3][0]=WALL;
-			m_walls_v[4][1]=WALL;
-			m_walls_v[0][2]=WALL;
-			m_walls_v[4][2]=WALL;
-			//m_walls_h[5][2]=WALL;
-			m_walls_h[5][3]=WALL;
-			m_walls_h[5][4]=WALL;
-			m_walls_v[3][5]=WALL;
-			m_walls_v[4][5]=WALL;
-			m_walls_v[1][5]=WALL;
-			m_walls_v[1][3]=WALL;
-			m_walls_v[0][2]=WALL;
-			m_walls_h[1][4]=WALL;
+				// h walls
+				fgets(line, 10, fichier);
+				while(line[0]!='\n')
+				{
+					int n;
+					for(n=0; n<10 && line[n]!=','; n++){nombre[n]=line[n];}
+					nombre[n]=0;
+					int x=atoi(nombre);
+			
+					int i;
+					for(i=n+1; i<10 && line[i]!='\n'; i++){nombre[i-n-1]=line[i];}
+					nombre[i-n-1]=0;
+					int y=atoi(nombre);
+
+					m_walls_h[x][y]=WALL;
+
+					fgets(line, 10, fichier);
+				}
+
+				// v walls
+				fgets(line, 10, fichier);
+				while(line[0]!='\n')
+				{
+					int n;
+					for(n=0; n<10 && line[n]!=','; n++){nombre[n]=line[n];}
+					nombre[n]=0;
+					int x=atoi(nombre);
+			
+					int i;
+					for(i=n+1; i<10 && line[i]!='\n'; i++){nombre[i-n-1]=line[i];}
+					nombre[i-n-1]=0;
+					int y=atoi(nombre);
+
+					m_walls_v[x][y]=WALL;
+
+					fgets(line, 10, fichier);
+				}
+
+				fclose(fichier);
+			}
 		}
 
 		int getWallDown(int x, int y)
@@ -222,15 +242,15 @@ class Maze
 						else
 						{
 							if(openList==NULL && closedList==NULL)
-								cout << " ¤ ";
+								cout << " " << CELL << " ";
 							else
 							{
 								if(isInOpen(openList,i,j))
-									cout << RED << " ¤ " << RESET;
+									cout << RED << " " << CELL << " " << RESET;
 								else if(isInClosed(closedList,i,j))
-									cout << GREEN << " ¤ " << RESET;
+									cout << GREEN << " " << CELL <<" " << RESET;
 								else
-									cout << " ¤ ";
+									cout << " " << CELL << " ";
 							}
 						}
 					}
@@ -305,16 +325,16 @@ class Maze
 						else
 						{
 							if(isInOpen(openList,i,j))
-								cout << RED << " ¤ " << RESET;
+								cout << RED << " " << CELL << " " << RESET;
 							else if(isInClosed(closedList,i,j))
 							{
 								if(isInPath(path,i,j))
-									cout << BOLDGREEN << " ¤ " << RESET;
+									cout << BOLDGREEN << " " << CELL << " " << RESET;
 								else
-									cout << GREEN << " ¤ " << RESET;
+									cout << GREEN << " " << CELL << " " << RESET;
 							}
 							else
-								cout << " ¤ ";
+								cout << " " << CELL << " ";
 						}
 					}
 				}

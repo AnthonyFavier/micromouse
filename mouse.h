@@ -736,7 +736,7 @@ class Mouse
 
 				if(isDestination(current))
 				{
-					returnStart();
+					//returnStart();
 					cout << endl << "exploration over !" << endl;
 					m_end=current;
 					computeOptPath();
@@ -875,6 +875,7 @@ class Mouse
 					sleep(2);
 					break;
 				case RUN:
+					cout << "c'est fini" << endl;
 					sleep(1);
 					break;
 			}

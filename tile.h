@@ -1,7 +1,7 @@
 #ifndef DEF_TILE
 #define DEF_TILE
 
-#define MAZE_WIDTH 6
+#define MAZE_WIDTH 12
 // Pair !!!
 
 struct Tile
