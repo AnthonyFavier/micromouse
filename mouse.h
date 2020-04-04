@@ -747,7 +747,7 @@ class Mouse
 				lookForNeighbour(neighbour); // return neighbour traversable and not in CLOSED
 				debug_showNeighbour(neighbour);
 
-				for(int i=0; !neighbour[i].empty && i<8; i++)
+				for(int i=0; !neighbour[i].empty && i<4; i++)
 				{
 					if(!isInOpen(neighbour[i].x, neighbour[i].y))
 					{
@@ -801,7 +801,7 @@ class Mouse
 				lookForNeighbourClosed(neighbour); // return neighbour traversable
 				debug_showNeighbour(neighbour);
 
-				for(int i=0; !neighbour[i].empty && i<8; i++)
+				for(int i=0; !neighbour[i].empty && i<4; i++)
 				{
 					cout << "neigh=(" << neighbour[i].x << "," << neighbour[i].y << ")" << endl;
 					if(isInOpen(neighbour[i].x, neighbour[i].y))
