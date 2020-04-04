@@ -2,9 +2,7 @@ import matplotlib.image as mpimg
 import numpy as np
 import sys
 
-fichier = open("walls.txt", "r")
-size=int(fichier.read())
-fichier.close()
+size=int(sys.argv[1])
 
 img = mpimg.imread("maze.png")
 
