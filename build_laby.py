@@ -47,4 +47,4 @@ for j in range(0,size) :
 	img[size*4][j*4+2]=(255,0,0)
 	img[size*4][j*4+3]=(255,0,0)
 
-mpimg.imsave("resultat.png", img)
+mpimg.imsave("maze.png", img)
