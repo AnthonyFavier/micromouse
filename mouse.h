@@ -723,7 +723,17 @@ class Mouse
 				changement=false;
 				for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 				{
-					if(m_openList[i].g_cost>m_path_length-2)
+					int dist_fin=0;
+					if(m_openList[i].x <= MAZE_WIDTH/2-1 && m_openList[i].y <= MAZE_WIDTH/2-1)
+						dist_fin=(MAZE_WIDTH/2-1 - m_openList[i].x)+(MAZE_WIDTH/2-1 - m_openList[i].y);
+					else if(m_openList[i].x <= MAZE_WIDTH/2-1 && m_openList[i].y >= MAZE_WIDTH/2)
+						dist_fin=(MAZE_WIDTH/2-1 - m_openList[i].x)+(m_openList[i].y - MAZE_WIDTH/2);
+					else if(m_openList[i].x >= MAZE_WIDTH/2 && m_openList[i].y >= MAZE_WIDTH/2)
+						dist_fin=(m_openList[i].x - MAZE_WIDTH/2)+(m_openList[i].y - MAZE_WIDTH/2);
+					else if(m_openList[i].x >= MAZE_WIDTH/2 && m_openList[i].y <= MAZE_WIDTH/2-1)
+						dist_fin=(m_openList[i].x - MAZE_WIDTH/2)+(MAZE_WIDTH/2-1 - m_openList[i].y);
+
+					if(m_openList[i].g_cost+dist_fin>=m_path_length)
 					{
 						moveInClosed(m_openList[i]);
 						changement=true;
@@ -913,7 +923,6 @@ class Mouse
 					sleep(2);
 					break;
 				case RUN:
-					cout << "c'est fini" << endl;
 					sleep(1);
 					break;
 			}
