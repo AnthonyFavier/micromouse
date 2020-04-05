@@ -243,8 +243,7 @@ class Mouse
 				neighbour[i]=vide;
 
 			int index=0;
-			if(!m_mazeInt.getWallUp(m_x,m_y)
-			&& !(m_last_x==m_x+1 && m_last_y==m_y))
+			if(!m_mazeInt.getWallUp(m_x,m_y))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x+1;
@@ -252,8 +251,7 @@ class Mouse
 				neighbour[index].directions[0]='u';
 				index++;
 			}
-			if(!m_mazeInt.getWallDown(m_x,m_y)
-			&& !(m_last_x==m_x-1 && m_last_y==m_y))
+			if(!m_mazeInt.getWallDown(m_x,m_y))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x-1;
@@ -261,8 +259,7 @@ class Mouse
 				neighbour[index].directions[0]='d';
 				index++;
 			}
-			if(!m_mazeInt.getWallRight(m_x,m_y)
-			&& !(m_last_x==m_x && m_last_y==m_y+1))
+			if(!m_mazeInt.getWallRight(m_x,m_y))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
@@ -270,8 +267,7 @@ class Mouse
 				neighbour[index].directions[0]='r';
 				index++;
 			}
-			if(!m_mazeInt.getWallLeft(m_x,m_y)
-			&& !(m_last_x==m_x && m_last_y==m_y-1))
+			if(!m_mazeInt.getWallLeft(m_x,m_y))
 			{
 				neighbour[index].empty=false;
 				neighbour[index].x=m_x;
@@ -300,18 +296,35 @@ class Mouse
 				int cp_y=m_openList[i].p_y;
 				while(cp_x!=m_start.x || cp_y!=m_start.y)
 				{
-					for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+					if(isInClosed(cp_x, cp_y))
 					{
-						if(m_closedList[i].x==cp_x && m_closedList[i].y==cp_y)
+						for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 						{
-							cp_x=m_closedList[i].p_x;
-							cp_y=m_closedList[i].p_y;
-							g_cost++;
-							break;
+							if(m_closedList[i].x==cp_x && m_closedList[i].y==cp_y)
+							{
+								cp_x=m_closedList[i].p_x;
+								cp_y=m_closedList[i].p_y;
+								g_cost++;
+								break;
+							}
+						}
+					}
+					else
+					{	
+						for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+						{
+							if(m_openList[i].x==cp_x && m_openList[i].y==cp_y)
+							{
+								cp_x=m_openList[i].p_x;
+								cp_y=m_openList[i].p_y;
+								g_cost++;
+								break;
+							}
 						}
 					}
 				}
 				m_openList[i].g_cost=g_cost;
+
 
 				// to end
 				int h_cost=0;
@@ -337,14 +350,30 @@ class Mouse
 				int cp_y=m_closedList[i].p_y;
 				while(cp_x!=m_start.x || cp_y!=m_start.y)
 				{
-					for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+					if(isInClosed(cp_x, cp_y))
 					{
-						if(m_closedList[i].x==cp_x && m_closedList[i].y==cp_y)
+						for(int i=0; !m_closedList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
 						{
-							cp_x=m_closedList[i].p_x;
-							cp_y=m_closedList[i].p_y;
-							g_cost++;
-							break;
+							if(m_closedList[i].x==cp_x && m_closedList[i].y==cp_y)
+							{
+								cp_x=m_closedList[i].p_x;
+								cp_y=m_closedList[i].p_y;
+								g_cost++;
+								break;
+							}
+						}
+					}
+					else
+					{	
+						for(int i=0; !m_openList[i].empty && i<MAZE_WIDTH*MAZE_WIDTH; i++)
+						{
+							if(m_openList[i].x==cp_x && m_openList[i].y==cp_y)
+							{
+								cp_x=m_openList[i].p_x;
+								cp_y=m_openList[i].p_y;
+								g_cost++;
+								break;
+							}
 						}
 					}
 				}
@@ -370,6 +399,7 @@ class Mouse
 		void updateCosts()
 		{
 			setFCosts();
+			
 
 			int dist=0;
 
@@ -834,8 +864,12 @@ class Mouse
 						{
 							cout << "path shorter" << endl;
 							setParent(neighbour+i,current.x,current.y);
+							
+							if(neighbour[i].x==m_end.x && neighbour[i].y==m_end.y)
+								replaceInClosed(neighbour[i]);
+							else
+								moveInOpen(neighbour[i]);
 
-							replaceInClosed(neighbour[i]);
 							computeOptPath();
 						}
 					}
@@ -852,7 +886,7 @@ class Mouse
 
 				if(isOptiDone())
 				{
-					returnStart();
+					//returnStart();
 					cout << endl << "exploration opti !" << endl;
 					computeOptPath();
 					showMapPath();
