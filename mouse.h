@@ -886,7 +886,7 @@ class Mouse
 
 				if(isOptiDone())
 				{
-					//returnStart();
+					returnStart();
 					cout << endl << "exploration opti !" << endl;
 					computeOptPath();
 					showMapPath();
